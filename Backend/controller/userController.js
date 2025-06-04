@@ -1,6 +1,7 @@
 import {catchAsyncErrors} from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../middlewares/errorMiddleware.js";
 import { User} from "../models/userSchema.js";
+import { generateToken } from "../utils/jwtToken.js";
 
 export const patientRegister = catchAsyncErrors(async (req, res, next) => {
     const {firstName, lastname, email, phone, password, gender, dob, nic, role} = req.body;
@@ -22,10 +23,8 @@ export const patientRegister = catchAsyncErrors(async (req, res, next) => {
         nic,
         role,   
     });
-    res.status(200).json({
-        success: true,
-        message: "user Registered!",
-    });
+     generateToken(user, "user Registered!", 200, res);
+    
 });
 
 export const login = catchAsyncErrors(async (req, res, next) => { 
@@ -47,8 +46,50 @@ export const login = catchAsyncErrors(async (req, res, next) => {
     if(role !== user.role) {
         return next(new ErrorHandler("User with this role not found", 400));
     }
+     generateToken(user, "User Login successfully!", 200, res);
+    
+});
+
+export const addNewAdmin = catchAsyncErrors(async (req, res, next) => {
+    const {
+        firstName,
+        lastname,
+        email,
+        phone,
+        password,
+        gender,
+        dob,
+        nic,
+    } = req.body;
+    if(
+        !firstName || 
+        !lastname || 
+        !email || 
+        !phone || 
+        !password ||
+        ! gender ||
+        !dob ||
+        !nic
+    ) {
+        return next(new ErrorHandler("Please Fill Full Form", 400));
+    }
+    const isRegistered = await User.findOne({email});
+    if(isRegistered) {
+        return next(new ErrorHandler("Admin with this email Already exists"));
+    }
+    const admin = await User.create({
+        firstName,
+        lastname,
+        email,
+        phone,
+        password,
+        gender,
+        dob,
+        nic,
+        role: "admin",
+});
     res.status(200).json({
         success: true,
-        message: "User Logged in successfully!",
-    })
+        message: "Admin Created Successfully",
+    });
 });
