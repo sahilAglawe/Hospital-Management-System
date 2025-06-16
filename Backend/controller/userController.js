@@ -93,3 +93,42 @@ export const addNewAdmin = catchAsyncErrors(async (req, res, next) => {
         message: "Admin Created Successfully",
     });
 });
+
+export const getAllDoctors = catchAsyncErrors(async (req, res, next) => {
+      const doctors = await User.find({role: "doctor"});
+        res.status(200).json({
+        success: true,
+        doctors,
+        });
+   });
+
+   export const getUsersDetails = catchAsyncErrors(async (req, res, next) => {
+    const user = req.user;
+    res.status(200).json({
+        success: true,
+        user,
+    });
+});
+
+export const logoutAdmin = catchAsyncErrors(async (req, res, next) => {
+    res.status(200).cookie("adminToken", "", {
+
+        expires: new Date(Date.now()),
+        httpOnly: true,
+    }).json({
+        success: true,
+        message: "Admin Logged Out Successfully",
+    });
+});
+
+export const logoutPatient = catchAsyncErrors(async (req, res, next) => {
+    res.status(200).cookie("patientToken", "", {
+
+        expires: new Date(Date.now()),
+        httpOnly: true,
+    }).json({
+        success: true,
+        message: "user Logged Out Successfully",
+    });
+});
+
